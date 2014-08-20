@@ -1,9 +1,9 @@
 ;;; erc-status.el --- notification area support for ERC
 
-;; Copyright (C) 2007 Tom Tromey <tromey@redhat.com>
+;; Copyright (C) 2007, 2014 Tom Tromey <tromey@redhat.com>
 
 ;; Author: Tom Tromey <tromey@redhat.com>
-;; Version: 0.1
+;; Version: 0.2
 ;; Keywords: comm
 
 ;; This file is not (yet) part of GNU Emacs.
@@ -34,8 +34,6 @@
 ;;   buffer in some frame (which is then raised).  If there are
 ;;   multiple pages at once, it will show one and you can click again
 ;;   to go to the next one.
-;; * Will show a menu of all the channels on the right button menu.
-;;   (Though... this doesn't work and I haven't debugged it.)
 ;; * Will pop up notification bubbles when you connect to or
 ;;   disconnect from a server.
 ;; This is regular erc module named 'status'; you can enable it as you
@@ -52,7 +50,6 @@
 ;; TO DO:
 ;; - make tool tip show some kind of real status ...?
 ;; - use a nicer icon
-;; - menu?  (tried but it isn't working yet)
 ;; - integrate with auto-query a bit better
 ;; - let left click use specified frame or make a new frame?
 
@@ -116,17 +113,6 @@ If there is no such buffer, do nothing."
   (when erc-status-buffer-list
     (switch-to-buffer (car erc-status-buffer-list))
     (raise-frame)))
-
-(defun erc-status-update-menu ()
-  (status-set-menu erc-status-status-icon
-		   (mapcar (lambda (buffer)
-			     (cons (buffer-name buffer)
-				   ;; Couldn't figure out how to do
-				   ;; this with backquote :(
-				   (eval (list 'lambda '()
-					       (list 'switch-to-buffer buffer)))))
-			   (erc-buffer-list))))
-
 
 
 

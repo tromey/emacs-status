@@ -3,7 +3,7 @@
 ;; Copyright (C) 2007, 2012, 2014 Tom Tromey <tom@tromey.com>
 
 ;; Author: Tom Tromey <tom@tromey.com>
-;; Version: 0.2
+;; Version: 0.3
 ;; Keywords: frames multimedia
 
 ;; This file is not (yet) part of GNU Emacs.
@@ -26,24 +26,6 @@
 
 ;; Commentary:
 
-;; To use this package you will need a specially modified version of
-;; zenity, a Gnome program.  The patch is available in Gnome bugzilla:
-;;
-;;   http://bugzilla.gnome.org/show_bug.cgi?id=310001
-;;
-;; I realize this is a burden.  I would like to have direct support
-;; for the notification area in Emacs itself.  That way, not only
-;; could it be made to work cross-platform, but also we have it use
-;; real menus, rather than the more limited ones provided by this
-;; module.
-
-;; Once you have installed a hacked zenity, you will need to put this
-;; file into your load-path, and then (load "status").
-;; (Or you can deal with the autoload...)
-;; You will also need to set status-zenity-path to point to your copy
-;; of zenity:
-;;    (setq status-zenity-path "/full/path/to/zenity")
-
 ;; There are no user-visible features of this module, only features
 ;; for Emacs Lisp programs.  You may like to use erc-status.el, which
 ;; provides some nice notification area support for ERC.
@@ -55,14 +37,6 @@
 ;; 2007-03-01   generate new buffer name for each status-new
 ;; 2007-01-29   reorder code in status-process-filter
 
-;; ToDo:
-
-;; * We should not use zenity.  Instead the code should be built
-;;   into Emacs, so that we can use ordinary menus instead of the
-;;   more limited ones zenity provides.
-
-(require 'cl)
-
 (defvar status-zenity-path "/home/tromey/gnu/zenity/install/bin/zenity"
   "Path to specially modified version of zenity.")
 
@@ -70,38 +44,9 @@
 (defvar status-click-callback)
 (make-variable-buffer-local 'status-click-callback)
 
-;; Callback alist for status icon.  Internal.
-(defvar status-menu-callbacks)
-(make-variable-buffer-local 'status-menu-callbacks)
-
 ;; Data used by the process filter.  Internal.
 (defvar status-input-string)
 (make-variable-buffer-local 'status-input-string)
-
-(defun status-set-menu (status-icon menu)
-  "Set the context menu on the status icon.
-STATUS-ICON is the icon.  MENU is a list of cons cells.  The car of a
-cell is the text for the menu label.  The cdr of a cell is a callback
-function.  This function is called with no arguments when the menu
-item is selected by the user.  If MENU is nil, any existing menu
-is removed."
-  (process-send-string status-icon "menu:\n")
-  (let ((callbacks nil)
-	(count 0))
-    (while menu
-      (process-send-string status-icon
-			   (concat "menuitem: "
-				   (shell-quote-argument (car (car menu)))
-				   (int-to-string count)
-				   "\n"))
-      (setq callbacks (cons (cons (int-to-string count) (cdr (car menu)))
-			    callbacks))
-      (setq count (+ 1 count))
-      (setq menu (cdr menu)))
-    (process-send-string status-icon "endmenu:\n")
-    (save-excursion
-      (set-buffer (process-buffer status-icon))
-      (setq status-menu-callbacks callbacks))))
 
 ;;;###autoload
 (defun status-new ()
@@ -176,9 +121,7 @@ If ARG is nil, blinking will be disabled.  Otherwise it will be enabled."
 	  ;; Look for the callback.
 	  (if (equal cb-name "click")
 	      (and status-click-callback
-		   (funcall status-click-callback))
-	    (let ((elt (assoc status-click-callback status-menu-callbacks)))
-	      (and elt (funcall (cdr elt))))))))))
+		   (funcall status-click-callback))))))))
 
 (provide 'status)
 

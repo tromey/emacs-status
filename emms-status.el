@@ -1,10 +1,10 @@
 ;;; emms-status.el --- status area support for EMMS
 
-;; Copyright (C) 2007, 2012 Tom Tromey <tromey@redhat.com>
+;; Copyright (C) 2007, 2012, 2014 Tom Tromey <tromey@redhat.com>
 
 ;; Author: Tom Tromey <tromey@redhat.com>
 ;; Created: 3 June 2007
-;; Version: 0.1
+;; Version: 0.2
 ;; Keywords: multimedia
 
 ;; This file is not (yet) part of GNU Emacs.
@@ -59,12 +59,6 @@
     (emms-status-update-icon)
     ;; Click to pause or play.
     (status-set-click-callback emms-status-icon 'emms-pause)
-    (status-set-menu emms-status-icon
-		     '(("Playlist" . emms-playlist-mode-go)
-		       ("Next" . emms-next)
-		       ("Previous" . emms-previous)
-		       ("Stop" . emms-stop)
-		       ("Pause/Play" . emms-pause)))
     ;; Have EMMS tell us when something happens.
     ;; FIXME: Could display new song in notification area.
     (add-hook 'emms-player-stopped-hook 'emms-status-update-icon)
