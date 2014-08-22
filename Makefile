@@ -5,6 +5,8 @@ PV = $(PACKAGE)-$(VERSION)
 
 all: $(PV).tar
 
+.PHONY: $(PV).tar
+
 $(PV).tar: status-pkg.el
 	@rm -rf $(PV)
 	mkdir $(PV)
