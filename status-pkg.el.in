@@ -1,2 +1,2 @@
 (define-package "status" "@VERSION@"
-  "FIXME")
+  "This package adds support for status icons to Emacs.")

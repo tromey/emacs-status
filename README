@@ -1,0 +1,9 @@
+This package adds support for status icons to Emacs.
+
+It does so via a helper program written in Python.  You'll need
+Python and the (new-style) Gtk bindings installed for it to work.
+
+The base "status" lisp code doesn't have any user-visible features.
+It just adds infrastructure that's usable from elisp.
+
+This package includes code to hook ERC and EMMS up to status icons.
