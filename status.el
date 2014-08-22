@@ -77,7 +77,7 @@
     (set-process-filter result 'status--process-filter)
     (status--send result "click: click\n")
     (status-set-icon result status-default-icon)
-    (process-kill-without-query result nil)
+    (set-process-query-on-exit-flag result nil)
     result))
 
 (defun status-set-click-callback (status-icon function)
