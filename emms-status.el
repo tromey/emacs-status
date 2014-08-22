@@ -32,19 +32,20 @@
 
 (require 'status)
 
-;; FIXME.
-(defvar emms-status-icon-directory "/usr/share/icons/gnome/48x48/actions/")
+(defvar emms-status-icon-directory
+  (file-name-directory load-file-name))
 
 (defvar emms-status-icon nil)
 
 (defun emms-status-update-icon ()
   ;; Set the icon.
   (status-set-icon emms-status-icon
-		   (concat emms-status-icon-directory
+		   (expand-file-name
 			   (if (or emms-player-paused-p
 				   (not emms-player-playing-p))
 			       "player_play.png"
-			     "player_pause.png")))
+			     "player_pause.png")
+			   emms-status-icon-directory))
   ;; Set the tooltip.
   (status-set-tooltip emms-status-icon
 		      (if emms-player-playing-p

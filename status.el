@@ -37,8 +37,12 @@
 ;; 2007-03-01   generate new buffer name for each status-new
 ;; 2007-01-29   reorder code in status-process-filter
 
-(defvar status-zenity-path "/home/tromey/gnu/zenity/install/bin/zenity"
-  "Path to specially modified version of zenity.")
+(defvar status-python "python"
+  "Name of the Python interpreter.")
+
+(defvar status-status.py-path
+  (expand-file-name "status.py" (file-name-directory load-file-name))
+  "Path to status.py.")
 
 ;; Callback function for a left-click on the status icon.  Internal.
 (defvar status-click-callback)
@@ -48,17 +52,23 @@
 (defvar status-input-string)
 (make-variable-buffer-local 'status-input-string)
 
+;; Default to the GNU.
+(defvar status-default-icon
+  (expand-file-name
+   "images/icons/hicolor/scalable/apps/emacs.svg"
+   data-directory))
+
 ;;;###autoload
 (defun status-new ()
   "Create a new status icon and return it."
   (let ((result (start-process "status-icon"
 			       (generate-new-buffer-name " *status-icon*")
-			       status-zenity-path
-			       "--notification"
-			       "--listen")))
+			       status-python
+			       status-status.py-path)))
     (set-process-filter result 'status-process-filter)
-    ;; Default to the GNU.
-    (process-send-string result "icon: /usr/share/pixmaps/emacs.png\n")
+    (process-send-string result (concat "icon: "
+					status-default-icon
+					"\n"))
     (process-send-string result "click: click\n")
     (process-kill-without-query result nil)
     result))
@@ -113,8 +123,7 @@ If ARG is nil, blinking will be disabled.  Otherwise it will be enabled."
     (set-buffer (process-buffer status-icon))
     (setq status-input-string (concat status-input-string string))
     (let ((index nil))
-      ;; FIXME?  uses search from cl.
-      (while (setq index (search "\n" status-input-string))
+      (while (setq index (cl-search "\n" status-input-string))
 	(let ((cb-name (substring status-input-string 0 index)))
 	  (setq status-input-string
 		(substring status-input-string (+ 1 index)))

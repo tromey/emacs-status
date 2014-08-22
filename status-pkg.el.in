@@ -1,0 +1,2 @@
+(define-package "status" "@VERSION@"
+  "FIXME")
