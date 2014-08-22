@@ -58,6 +58,15 @@
    "images/icons/hicolor/scalable/apps/emacs.svg"
    data-directory))
 
+(defvar status--debug nil)
+
+;; Convenience function to send to process.
+;; This is mostly handy for debugging.
+(defun status--send (icon string)
+  (process-send-string icon string)
+  (if status--debug
+      (message "send: %s" string)))
+
 ;;;###autoload
 (defun status-new ()
   "Create a new status icon and return it."
@@ -65,11 +74,9 @@
 			       (generate-new-buffer-name " *status-icon*")
 			       status-python
 			       status-status.py-path)))
-    (set-process-filter result 'status-process-filter)
-    (process-send-string result (concat "icon: "
-					status-default-icon
-					"\n"))
-    (process-send-string result "click: click\n")
+    (set-process-filter result 'status--process-filter)
+    (status--send result "click: click\n")
+    (status-set-icon result status-default-icon)
     (process-kill-without-query result nil)
     result))
 
@@ -88,24 +95,25 @@ status icon."
 STATUS-ICON is the status icon object.  FILE-OR-NAME is either a file
 name, or it is one of the stock icon names: \"warning\", \"info\",
 \"question\", or \"error\"."
-  (process-send-string status-icon (concat "icon: " file-or-name "\n")))
+  (status--send status-icon (concat "icon: " file-or-name "\n")))
 
 (defun status-set-visible (status-icon arg)
   "Make the status icon visible or invisible.
 If ARG is nil, make icon invisible.  Otherwise, make it visible"
-  (process-send-string status-icon (concat "visible: "
-					   (if arg "true" "false"))))
+  (status--send status-icon (concat "visible: "
+				    (if arg "true" "false")
+				    "\n")))
 
 (defun status-post-message (status-icon text)
   "Post a message by the status icon.
 STATUS-ICON is the status icon object.  TEXT is the text to post.
 It will appear as a popup near the icon.  TEXT should not contain
 any newlines."
-  (process-send-string status-icon (concat "message:" text "\n")))
+  (status--send status-icon (concat "message:" text "\n")))
 
 (defun status-set-tooltip (status-icon text)
   "Set the tooltip for the status icon."
-  (process-send-string status-icon (concat "tooltip: " text "\n")))
+  (status--send status-icon (concat "tooltip: " text "\n")))
 
 (defun status-delete (status-icon)
   "Destroy the status icon."
@@ -114,13 +122,15 @@ any newlines."
 (defun status-set-blink (status-icon arg)
   "Enable or disable blinking of the status icon.
 If ARG is nil, blinking will be disabled.  Otherwise it will be enabled."
-  (process-send-string status-icon (concat "blink: "
-					   (if arg "true" "false")
-					   "\n")))
+  (status--send status-icon (concat "blink: "
+				    (if arg "true" "false")
+				    "\n")))
 
-(defun status-process-filter (status-icon string)
+(defun status--process-filter (status-icon string)
   (save-excursion
     (set-buffer (process-buffer status-icon))
+    (if status--debug
+	(message "status <- %s" string))
     (setq status-input-string (concat status-input-string string))
     (let ((index nil))
       (while (setq index (cl-search "\n" status-input-string))
