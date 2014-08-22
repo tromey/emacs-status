@@ -85,8 +85,7 @@
 STATUS-ICON is the status icon.  FUNCTION is the callback function.
 It will be called with no arguments when the user clicks on the
 status icon."
-  (save-excursion
-    (set-buffer (process-buffer status-icon))
+  (with-current-buffer (process-buffer status-icon)
     (setq status-click-callback function)))
 
 ;; Set the icon, either to a file name or to a stock icon name.
@@ -127,8 +126,7 @@ If ARG is nil, blinking will be disabled.  Otherwise it will be enabled."
 				    "\n")))
 
 (defun status--process-filter (status-icon string)
-  (save-excursion
-    (set-buffer (process-buffer status-icon))
+  (with-current-buffer (process-buffer status-icon)
     (if status--debug
 	(message "status <- %s" string))
     (setq status-input-string (concat status-input-string string))
