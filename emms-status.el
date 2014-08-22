@@ -58,6 +58,7 @@
   (unless emms-status-icon
     (setq emms-status-icon (status-new))
     (emms-status-update-icon)
+    (status-set-visible emms-status-icon t)
     ;; Click to pause or play.
     (status-set-click-callback emms-status-icon 'emms-pause)
     ;; Have EMMS tell us when something happens.

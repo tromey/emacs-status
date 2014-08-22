@@ -145,7 +145,8 @@ If there is no such buffer, do nothing."
      (status-set-tooltip erc-status-status-icon
 			 "ERC - IRC client for Emacs")
      (status-set-click-callback erc-status-status-icon
-				'erc-status-select-first-buffer))
+				'erc-status-select-first-buffer)
+     (status-set-visible erc-status-status-icon t))
    (add-hook 'erc-text-matched-hook 'erc-status-match-hook)
    (add-hook 'kill-buffer-hook 'erc-status-buffer-killed)
    (add-hook 'window-configuration-change-hook
