@@ -10,7 +10,7 @@ all: $(PV).tar
 $(PV).tar: status-pkg.el
 	@rm -rf $(PV)
 	mkdir $(PV)
-	cp *.el *.png $(PV)
+	cp *.el *.png *.py $(PV)
 	tar -cf $(PV).tar $(PV)
 	rm -rf $(PV)
 
