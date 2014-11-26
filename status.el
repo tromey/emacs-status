@@ -64,8 +64,8 @@
 ;; This is mostly handy for debugging.
 (defun status--send (icon string)
   (process-send-string icon string)
-  (if status--debug
-      (message "send: %s" string)))
+  (when status--debug
+    (message "send: %s" string)))
 
 ;;;###autoload
 (defun status-new ()
@@ -75,7 +75,7 @@
 			       status-python
 			       status-status.py-path)))
     (set-process-filter result 'status--process-filter)
-    (status--send result "click: click\n")
+    (status--send result "click: @@@click@@@\n")
     (status-set-icon result status-default-icon)
     (set-process-query-on-exit-flag result nil)
     result))
@@ -127,8 +127,8 @@ If ARG is nil, blinking will be disabled.  Otherwise it will be enabled."
 
 (defun status--process-filter (status-icon string)
   (with-current-buffer (process-buffer status-icon)
-    (if status--debug
-	(message "status <- %s" string))
+    (when status--debug
+      (message "status <- %s" string))
     (setq status-input-string (concat status-input-string string))
     (let ((index nil))
       (while (setq index (cl-search "\n" status-input-string))
@@ -136,9 +136,11 @@ If ARG is nil, blinking will be disabled.  Otherwise it will be enabled."
 	  (setq status-input-string
 		(substring status-input-string (+ 1 index)))
 	  ;; Look for the callback.
-	  (if (equal cb-name "click")
+	  (if (equal cb-name "@@@click@@@")
 	      (and status-click-callback
-		   (funcall status-click-callback))))))))
+		   (funcall status-click-callback))
+	    ;; Got some kind of error.
+	    (insert cb-name "\n")))))))
 
 (provide 'status)
 

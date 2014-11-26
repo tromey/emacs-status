@@ -1,8 +1,13 @@
 # status.py - status icon helper for status.el
 # Copyright (C) 2014 Tom Tromey <tom@tromey.com>
 
-from gi.repository import Gtk, Gdk, GObject, Notify
+# Gtk3 got rid of blinking status icons! :-(
+import glib
+import gobject
+import gtk
+import pynotify
 
+import traceback
 import threading
 import Queue
 import sys
@@ -32,13 +37,18 @@ def handle_queue(source, condition):
     global _event_queue
     os.read(source, 1)
     func = _event_queue.get()
-    func()
+    try:
+        func()
+    except:
+        # Don't let exceptions propagate, but print them so they show
+        # up in the process buffer.
+        traceback.print_exc(file = sys.stdout)
     return True
 
 class StatusIcon:
     def __init__(self):
         self.click = 'click'
-        self.icon = Gtk.StatusIcon()
+        self.icon = gtk.StatusIcon()
         self.icon.set_visible(False)
         self.icon.connect('activate', self._activate)
 
@@ -58,7 +68,7 @@ class StatusIcon:
         self.icon.set_visible(arg == 'true')
 
     def do_message(self, arg):
-        m = Notify.Notification.new(arg, None, None)
+        m = pynotify.Notification(arg, None, None)
         m.show()
 
     def do_tooltip(self, arg):
@@ -81,9 +91,8 @@ def dispatch(arg):
     arg = arg[n + 1:].strip()
     getattr(icon, method)(arg)
 
-GObject.threads_init()
-Gdk.threads_init()
-GObject.io_add_watch(read_pipe, GObject.IO_IN, handle_queue)
-Notify.init('status')
+gobject.threads_init()
+gobject.io_add_watch(read_pipe, gobject.IO_IN, handle_queue)
+pynotify.init('status')
 StdinThread().start()
-Gtk.main()
+gtk.main()
