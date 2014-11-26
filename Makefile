@@ -14,7 +14,7 @@ $(PV).tar: status-pkg.el
 	tar -cf $(PV).tar $(PV)
 	rm -rf $(PV)
 
-status-pkg.el: status-pkg.el.in
+status-pkg.el: status-pkg.el.in Makefile
 	sed 's/@VERSION@/$(VERSION)/' < status-pkg.el.in > tmp
 	mv tmp status-pkg.el
 
