@@ -73,12 +73,11 @@
        (status-set-blink erc-status-status-icon nil)))
 
 (defun erc-status-add-buffer (buffer)
-  (and (not (erc-buffer-visible buffer))
-       (progn
-	 (status-set-blink erc-status-status-icon t)
-	 (or (memq buffer erc-status-buffer-list)
-	     (setq erc-status-buffer-list (cons buffer
-						erc-status-buffer-list))))))
+  (unless (erc-buffer-visible buffer)
+    (status-set-blink erc-status-status-icon t)
+    (unless (memq buffer erc-status-buffer-list)
+      (setq erc-status-buffer-list (cons buffer
+					 erc-status-buffer-list)))))
 
 (defun erc-status-match-hook (match-type nick message)
   ;; Look for user's nick and make the icon blink.
@@ -90,16 +89,16 @@
   (erc-status-remove-buffer (current-buffer)))
 
 (defun erc-status-window-configuration-changed ()
-  (let ((new-list)
-	(iter erc-status-buffer-list))
-    (while iter
-      (or (erc-buffer-visible (car iter))
-	  (setq new-list (cons (car iter) new-list)))
-      (setq iter (cdr iter)))
-    (or (setq erc-status-buffer-list new-list)
-	(status-set-blink erc-status-status-icon nil))))
+  (let ((new-list))
+    (dolist (buffer erc-status-buffer-list)
+      (unless (erc-buffer-visible buffer)
+	(setq new-list (cons buffer new-list))))
+    (unless (setq erc-status-buffer-list new-list)
+      (status-set-blink erc-status-status-icon nil))))
 
 (defun erc-status-disconnected (nick ip reason)
+  ;; FIXME: should mention the server from which we were disconnected.
+  ;; FIXME: add a :action to reconnect.
   (status-post-message erc-status-status-icon
 		       (concat "Disconnected: " reason)))
 
@@ -159,7 +158,7 @@ If there is no such buffer, do nothing."
 
   ;; Disable.
   ((when erc-status-status-icon
-     (kill-process erc-status-status-icon)
+     (status-delete erc-status-status-icon)
      (setq erc-status-status-icon nil))
    (remove-hook 'erc-text-matched-hook 'erc-status-match-hook)
    (remove-hook 'kill-buffer-hook 'erc-status-buffer-killed)
