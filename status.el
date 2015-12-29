@@ -37,6 +37,8 @@
 ;; 2007-03-01   generate new buffer name for each status-new
 ;; 2007-01-29   reorder code in status-process-filter
 
+;;; Code:
+
 (defvar status-python "python"
   "Name of the Python interpreter.")
 
